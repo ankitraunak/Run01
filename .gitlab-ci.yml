@@ -1,0 +1,29 @@
+stages:
+  - test
+
+
+Cypress-test-job:
+  image: cypress/browsers
+  stage: test
+  script:
+    - npm ci
+    - npm install cypress-cucumber-preprocessor --save-dev
+    - npm install mochawesome --save-dev
+    - npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator cypress-mochawesome-reporter
+    - npx cypress run
+    - npx mochawesome-merge mochawesome-report/.jsons/*.json > mochawesome.json
+    - npx mochawesome-report-generator mochawesome.json -o mochawesome-report/html
+    - ls -R mochawesome-report/html  # List files to verify they exist
+
+    # Check if HTML report is generated
+    - ls -l mochawesome-report/html  # List contents of the html directory to verify
+
+  artifacts:
+    when: always
+    paths:
+      - mochawesome-report/**  
+      - cypress/screenshots  
+      - cypress/videos
+    expire_in: 12 days
+
+
